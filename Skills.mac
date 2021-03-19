@@ -1,0 +1,289 @@
+|**
+	Skills v1.4 Original Author: Blasty
+	Maintained for RedGuides by Blasty 2021-03-19
+	This macro was written exclusively for subscribers of Redguides.com
+	Purpose: To automatically raise all skills
+	Feature: Target something to use targeted abilities automatically like a healer merc
+	Recommended: Use a private location for this macro such as a private guild lobby
+**| 
+| --------------------------------------------------------------------------------------------
+| SUB: Main
+| --------------------------------------------------------------------------------------------
+Sub Main
+	/declare	medTill 					int 	outer 	100
+	/declare 	AbilitiesCheckDone    		bool   	outer
+	/declare 	SpellsCheckDone    			bool   	outer
+	/declare 	SpecializeSpellCheckDone	bool   	outer
+	/declare 	PracticeSpell[16,8]			string	outer  
+	/declare	SkillsIniFile 					string	outer 	Skills.ini
+	/call LoadIni
+	/echo Skills macro running.
+	
+|CLERIC - Confirmed
+    /varset PracticeSpell[2,1]      Endure Poison
+    /varset PracticeSpell[2,2]      Minor Healing
+    /varset PracticeSpell[2,3]      Halo of Light
+    /varset PracticeSpell[2,4]      True North
+    /varset PracticeSpell[2,5]      Strike
+
+|PALADIN
+    /varset PracticeSpell[3,1]      Courage
+    /varset PracticeSpell[3,2]      Salve
+    /varset PracticeSpell[3,3]      Hammer of Wrath
+    /varset PracticeSpell[3,4]      True North
+    /varset PracticeSpell[3,5]      Cease
+
+|RANGER - Confirmed
+    /varset PracticeSpell[4,1]      Endure Fire
+    /varset PracticeSpell[4,2]      Salve
+    /varset PracticeSpell[4,3]      Dance of the Fireflies
+    /varset PracticeSpell[4,4]      Glimpse
+    /varset PracticeSpell[4,5]      Ignite
+  
+|SHADOW KNIGHT
+    /varset PracticeSpell[5,1]      Endure Cold
+    /varset PracticeSpell[5,2]      Siphon Strength
+    /varset PracticeSpell[5,3]      Disease Cloud 
+    /varset PracticeSpell[5,4]      Sense the Dead
+    /varset PracticeSpell[5,5]      Ward Undead
+  
+|DRUID - Confirmed
+    /varset PracticeSpell[6,1]      Skin like Wood
+    /varset PracticeSpell[6,2]      Minor Healing
+    /varset PracticeSpell[6,3]      Summon Food
+    /varset PracticeSpell[6,4]      Sense Animals
+    /varset PracticeSpell[6,5]      Burst of Fire
+  
+|SHAMAN - Confirmed
+    /varset PracticeSpell[10,1]     Endure Cold
+    /varset PracticeSpell[10,2]     Minor Healing
+    /varset PracticeSpell[10,3]     Summon Drink
+    /varset PracticeSpell[10,4]     True North
+    /varset PracticeSpell[10,5]     Burst of Flame
+  
+|NECROMANCER - Confirmed
+    /varset PracticeSpell[11,1]     Minor Shielding
+    /varset PracticeSpell[11,2]     Lifetap
+    /varset PracticeSpell[11,3]     Coldlight
+    /varset PracticeSpell[11,4]     True North
+    /varset PracticeSpell[11,5]     Word of Shadow
+  
+|WIZARD
+    /varset PracticeSpell[12,1]     Minor Shielding
+    /varset PracticeSpell[12,2]     Root
+    /varset PracticeSpell[12,3]     Halo of Light
+    /varset PracticeSpell[12,4]     True North
+    /varset PracticeSpell[12,5]     Blast of Cold
+  
+|MAGICIAN - Confirmed
+    /varset PracticeSpell[13,1]     Minor Shielding
+    /varset PracticeSpell[13,2]     Renew Elements
+    /varset PracticeSpell[13,3]     Summon Brass Choker
+    /varset PracticeSpell[13,4]     True North
+    /varset PracticeSpell[13,5]     Burst of Flame
+  
+|ENCHANTER - Confirmed
+    /varset PracticeSpell[14,1]     Minor Shielding
+    /varset PracticeSpell[14,2]     Strengthen
+    /varset PracticeSpell[14,3]     Mesmerize
+    /varset PracticeSpell[14,4]     True North
+    /varset PracticeSpell[14,5]     Chaotic Feedback
+  
+|BEASTLORD
+    /varset PracticeSpell[15,1]     Endure Cold
+    /varset PracticeSpell[15,2]     Salve
+    /varset PracticeSpell[15,3]     Summon Drink
+    /varset PracticeSpell[15,4]     Sense Animals
+    /varset PracticeSpell[15,5]     Blast of Frost
+	
+| Check if something is in the cursor
+	/if (${Cursor.ID}) {
+		/echo You are holding something in your cursor... We will put it in your bag for you.
+		/while (${Cursor.ID}) {
+			/autoinv
+			/delay 1
+		}
+	}
+	/call MemSpells
+:mainloop
+	/if (${AbilitiesCheckDone} && ${SpellsCheckDone} && ${SpecializeSpellCheckDone}) {
+		/echo All skills are maxed out - Thanks for using Skills
+		/echo Ending macro...
+		/end
+	}
+	/if (${BypassAbilities} && ${BypassSpells} && ${BypassSpecializeSpell}) {
+		/echo Error - All skills are bypassed
+		/echo Ending macro...
+		/end
+	}
+	/call Abilities
+	/if (${Me.Class.CanCast}) {
+		/if (${Me.PctMana} < 10 && !${Me.Sitting}) {
+			/sit
+			:med
+			/if (${Me.PctMana} < ${medTill} && ${Me.Sitting}) /goto :med
+		} else {
+			/call Spells
+			/call SpecializeSpell
+		}
+	} else /varset SpellsCheckDone TRUE
+	/goto :mainloop
+/return
+| --------------------------------------------------------------------------------------------
+| SUB: LoadIni
+| --------------------------------------------------------------------------------------------
+Sub LoadIni
+	/call DeclareIniVar	SkillsIniFile BypassAbilities		bool		General
+	/call DeclareIniVar	SkillsIniFile BypassSpells			bool		General
+	/call DeclareIniVar	SkillsIniFile BypassSpecializeSpell	bool		General
+/return
+| --------------------------------------------------------------------------------------------
+| SUB: LoadIni
+| --------------------------------------------------------------------------------------------
+Sub DeclareIniVar(string IniFile, string VarName, string VarType, string SectionName, string VarValue, string Alias) 
+   /if ( !${Defined[${VarName}]} ) /declare ${VarName} ${VarType} outer
+   /declare TempString string local ${Ini["${${IniFile}}",${SectionName},${VarName},NOTFOUND]}
+   /if ( ${TempString.Equal[NOTFOUND]} ) { 
+      /varset ${VarName} ${VarValue} 
+      /ini "${${IniFile}}" "${SectionName}" "${VarName}" "${${VarName}}" 
+   } else { 
+      /varset ${VarName} ${TempString} 
+   }
+/return
+| --------------------------------------------------------------------------------------------
+| SUB: Abilities
+| --------------------------------------------------------------------------------------------
+Sub Abilities
+	/if (${AbilitiesCheckDone} || ${BypassAbilities}) /return
+		/if (${Me.Skill[tracking]} && ${Me.Skill[tracking]} < ${Skill[tracking].SkillCap} && ${Me.AbilityReady[tracking]}) /doability "tracking"
+| Closes the tracking window
+		/if (${Window[TrackingWnd].Child[TRW_DoneButton]}) /notify TrackingWnd TRW_DoneButton leftmouseup
+		/if (${Me.Skill[feign death]} && ${Me.Skill[feign death]} < ${Skill[feign death].SkillCap} && ${Me.AbilityReady[feign death]}) {
+			/doability "feign death"
+			/delay 5
+			/if (!${Me.Standing}) /stand
+		}
+		/if (${Me.Skill[hide]} && ${Me.Skill[hide]} < ${Skill[hide].SkillCap} && ${Me.AbilityReady[hide]}) /doability "hide"
+		/if (${Me.Skill[sneak]} && ${Me.Skill[sneak]} < ${Skill[sneak].SkillCap} && ${Me.AbilityReady[sneak]}) /doability "sneak"
+		/if (${Me.Skill[mend]} && ${Me.Skill[mend]} < ${Skill[mend].SkillCap} && ${Me.AbilityReady[mend]}) /doability "mend"
+		/if (${Me.Skill[forage]} && ${Me.Skill[forage]} < ${Skill[forage].SkillCap} && ${Me.AbilityReady[forage]}) {
+			/if (${Me.Sitting}) /stand 
+			/doability "forage"
+		}
+		/call checkcursor
+|| Check if you have a valid target and not yourself
+		/if (!${Target.ID}||${Target.Type.Equal[pc]} && ${Zone.Type}||${Target.Master.Type.Equal[PC]} && ${Zone.Type}||${Target.Type.Equal[corpse]}||${Target.Distance}>${Target.MaxRange}||${Target.ID}==${Me.ID}) {
+			/echo ${Target.DisplayName} is not a valid target!
+			/echo ${Target.Type.Equal[pc]} && ${Zone.Type}
+			/end
+		}
+		/if (${Me.Skill[flying kick]} && ${Me.AbilityReady[flying kick]} && ${Me.Skill[flying kick]} < ${Skill[flying kick].SkillCap}) /doability "flying kick"
+		/if (${Me.Skill[bash]} && ${Me.AbilityReady[bash]} && ${Me.Skill[bash]} < ${Skill[bash].SkillCap} && (${InvSlot[offhand].Item.Type.Find[shield]}||${Me.AltAbility[2 Hand Bash]})) /doability "bash"
+		/if (${Me.Skill[frenzy]} && ${Me.AbilityReady[frenzy]} && ${Me.Skill[frenzy]} < ${Skill[frenzy].SkillCap}) /doability "frenzy"
+		/if (${Me.Skill[slam]} && ${Me.AbilityReady[slam]} && !${Me.AbilityReady[bash]} && ${Me.Skill[slam]} < ${Skill[slam].SkillCap}) /doability "slam"
+		/if (${Me.Skill[round kick]} && ${Me.AbilityReady[round kick]} && ${Me.Skill[round kick]} < ${Skill[round kick].SkillCap}) /doability "round kick"
+		/if (${Me.Skill[kick]} && ${Me.AbilityReady[kick]} && ${Me.Skill[kick]} < ${Skill[kick].SkillCap}) /doability "kick"
+		/if (${Me.Skill[tiger claw]} && ${Me.AbilityReady[tiger claw]} && ${Me.Skill[tiger claw]} < ${Skill[tiger claw].SkillCap}) /doability "tiger claw"
+		/if (${Me.Skill[Disarm]} && ${Target.Distance}<12 && ${Me.AbilityReady[Disarm]} && ${Me.Skill[Disarm]} < ${Skill[Disarm].SkillCap}) /doability "Disarm"
+		/if (${Me.Skill[Backstab]} && ${Me.AbilityReady[Backstab]} && ${Melee.Behind} && ${Me.Skill[Backstab]} < ${Skill[Backstab].SkillCap}) /doability "Backstab"
+		/if (${Me.Skill[Taunt]} && ${Me.Skill[Taunt]} < ${Skill[Taunt].SkillCap} && ${Me.AbilityReady[Taunt]}) /doability "Taunt"
+		/if (${Me.Skill[tracking]} >= ${Skill[tracking].SkillCap} && ${Me.Skill[feign death]} >= ${Skill[feign death].SkillCap} && ${Me.Skill[hide]} >= ${Skill[hide].SkillCap} && ${Me.Skill[sneak]} >= ${Skill[sneak].SkillCap} && ${Me.Skill[mend]} >= ${Skill[mend].SkillCap} && ${Me.Skill[forage]} >= ${Skill[forage].SkillCap} && ${Me.Skill[flying kick]} >= ${Skill[flying kick].SkillCap} && (${Me.Skill[bash]} >= ${Skill[bash].SkillCap} || !${InvSlot[offhand].Item.Type.Find[shield]}) && ${Me.Skill[frenzy]} >= ${Skill[frenzy].SkillCap} && ${Me.Skill[slam]} >= ${Skill[slam].SkillCap} && ${Me.Skill[round kick]} >= ${Skill[round kick].SkillCap} && ${Me.Skill[kick]} >= ${Skill[kick].SkillCap} && ${Me.Skill[tiger claw]} >= ${Skill[tiger claw].SkillCap} && ${Me.Skill[Disarm]} >= ${Skill[Disarm].SkillCap} && ${Me.Skill[Backstab]} >= ${Skill[Backstab].SkillCap} && ${Me.Skill[Taunt]} >= ${Skill[Taunt].SkillCap}) {
+			/varset AbilitiesCheckDone TRUE
+			/popup Abilities are maxed out - Grats!
+			/echo Abilities are maxed out - Grats!
+			/if (${Me.Skill[bash]} < ${Skill[bash].SkillCap} && !${InvSlot[offhand].Item.Type.Find[shield]}) {
+				/echo Note! Your Bash skill is not maxed out! (${Me.Skill[bash]} / ${Skill[bash].SkillCap})
+				/echo Equip a shield and run the macro again if needed
+			}
+		}
+/return
+| --------------------------------------------------------------------------------------------
+| SUB: MemSpells
+| --------------------------------------------------------------------------------------------
+Sub MemSpells
+	/if (${Select[${Me.Class.Name},Warrior,Berserker,Monk,Rogue,Bard]}>=1) /return
+    /declare i int local
+    /for i 1 to 5
+        /if (!${Me.Gem[${PracticeSpell[${Me.Class.ID},${i}]}]}) {
+            /echo Memorizing Spell >> ${PracticeSpell[${Me.Class.ID},${i}]} <<
+            /memspell ${i} "${PracticeSpell[${Me.Class.ID},${i}]}"
+            /delay 10s ${Me.Gem[${PracticeSpell[${Me.Class.ID},${i}]}]}
+			/if (!${Select[${PracticeSpell[${Me.Class.ID},${i}]},${Me.Gem[${i}]}]}) /echo Spell mem failed!
+        }
+    /next i
+/return
+| --------------------------------------------------------------------------------------------
+| SUB: Spells
+| --------------------------------------------------------------------------------------------
+Sub Spells
+	/if (${SpellsCheckDone} || ${BypassSpells}) /return
+	/if (${Me.Casting.ID} && !${Me.Class.ShortName.Equal[BRD]}||${Me.Hovering}||${Window[tradewnd].Open}||${Window[lootwnd].Open}) /return
+	/if (${Me.Skill[Abjuration]} < ${Skill[Abjuration].SkillCap}) /call Raise Abjuration
+	/if (${Me.Skill[Alteration]} < ${Skill[Alteration].SkillCap}) /call Raise Alteration
+	/if (${Me.Skill[Conjuration]} < ${Skill[Conjuration].SkillCap}) /call Raise Conjuration
+	/if (${Me.Skill[Divination]} < ${Skill[Divination].SkillCap}) /call Raise Divination
+	/if (${Me.Skill[Evocation]} < ${Skill[Evocation].SkillCap}) /call Raise Evocation
+	/if (${Me.Skill[Divination]} >= ${Skill[Divination].SkillCap} && ${Me.Skill[Evocation]} >= ${Skill[Evocation].SkillCap} && ${Me.Skill[Abjuration]} >= ${Skill[Abjuration].SkillCap} && ${Me.Skill[Alteration]} >= ${Skill[Alteration].SkillCap} && ${Me.Skill[Divination]} >= ${Skill[Divination].SkillCap} && ${Me.Skill[Conjuration]} >= ${Skill[Conjuration].SkillCap}) {
+		/varset SpellsCheckDone TRUE
+		/popup All spell skills are maxed out - Grats!
+		/echo All spell skills are maxed out - Grats!
+	}
+/return
+| --------------------------------------------------------------------------------------------
+| SUB: SpecializeSpell
+| --------------------------------------------------------------------------------------------
+Sub SpecializeSpell
+    /if (${SpecializeSpellCheckDone} || ${BypassSpecializeSpell}) /return
+	/if (${Me.Casting.ID} && !${Me.Class.ShortName.Equal[BRD]}||${Me.Hovering}||${Window[tradewnd].Open}||${Window[lootwnd].Open}) /return
+	/if (${Me.Skill[Specialize Abjuration]} < ${Skill[Specialize Abjuration].SkillCap}) /call Raise Abjuration
+	/if (${Me.Skill[Specialize Alteration]} < ${Skill[Specialize Alteration].SkillCap}) /call Raise Alteration
+	/if (${Me.Skill[Specialize Conjuration]} < ${Skill[Specialize Conjuration].SkillCap}) /call Raise Conjuration
+	/if (${Me.Skill[Specialize Divination]} < ${Skill[Specialize Divination].SkillCap}) /call Raise Divination
+	/if (${Me.Skill[Specialize Evocation]} < ${Skill[Specialize Evocation].SkillCap}) /call Raise Evocation
+	/if (${Me.Skill[Specialize Evocation]} >= ${Skill[Specialize Evocation].SkillCap} && ${Me.Skill[Specialize Evocation]} >= ${Skill[Specialize Evocation].SkillCap} && ${Me.Skill[Specialize Abjuration]} >= ${Skill[Specialize Abjuration].SkillCap} && ${Me.Skill[Specialize Alteration]} >= ${Skill[Specialize Alteration].SkillCap} && ${Me.Skill[Specialize Divination]} >= ${Skill[Specialize Divination].SkillCap} && ${Me.Skill[Specialize Conjuration]} >= ${Skill[Specialize Conjuration].SkillCap}) {
+		/varset SpecializeSpellCheckDone TRUE
+		/popup All spell Specialization skills are maxed out - Grats!
+		/echo All spell skills are maxed out - Grats!
+	}
+/return
+
+| --------------------------------------------------------------------------------------------
+| SUB: Raise
+| --------------------------------------------------------------------------------------------
+Sub Raise(skilltype)
+	/if (${Me.Casting.ID} && !${Me.Class.ShortName.Equal[BRD]}||${Me.Hovering}||${Window[tradewnd].Open}||${Window[lootwnd].Open}) /return
+	/declare i int local
+	/call checkcursor
+	/for i 1 to 5
+		/if (${Me.CurrentMana}>${Me.Gem[${i}].Mana} && ${Me.Gem[${i}].Skill.Equal[${skilltype}]} && !${Me.GemTimer[${i}]} && ${Me.SpellReady[${Me.Gem[${i}]}]} && !${Select[${Me.Gem[${i}].Category},Transport,Traps,Aura]} && !${Select[${Me.Gem[${i}].Subcategory},Invulnerability]} && (!${Me.Gem[${i}].Subcategory.Find[Sum: ]}||!${Me.Pet.ID})) {
+			/if (${Me.Gem[${i}].TargetType.Equal[Single]} && ${Target.Type.NotEqual[npc]} && ${${Me.Gem[${i}].SpellType.Equal[Detrimental]}}) {
+				/squelch /tar npc range ${Me.Gem[${i}].MyRange}
+				/delay 1
+				/if (!${Target.ID}) /squelch /tar myself
+				/delay 1
+			}
+			/if (${Me.Gem[${i}].TargetType.Equal[Single]} && !${Target.ID} && ${${Me.Gem[${i}].SpellType.NotEqual[Detrimental]}}) {
+				/if (!${Target.ID}) /squelch /tar myself
+				/delay 1
+			}
+			/if (${Me.Gem[${i}].TargetType.Equal[pet]} && !${Me.Pet.ID}) /goto :skip
+| Hardcoded due to ranger spell requirement (cast at night only)
+			/if (${Spell[${Me.Gem[${i}]}].Name.Equal[Dance of the Fireflies]} && !${GameTime.Night}) /goto :skip
+			/casting "${Me.Gem[${i}]}" gem${i}
+			/delay 1s
+			/delay 10s !${Me.Casting.ID}
+		}
+	:skip
+	/next i
+/return
+
+| --------------------------------------------------------------------------------------------
+| SUB: checkcursor
+| Used in Forage and Conjuration skills
+| --------------------------------------------------------------------------------------------
+Sub checkcursor
+	/while (${Cursor.ID}) {
+		/destroy
+		/delay 2
+	}
+/return
