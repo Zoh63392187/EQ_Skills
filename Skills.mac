@@ -51,8 +51,8 @@ Sub Main
     /varset PracticeSpell[6,1]      Skin like Wood
     /varset PracticeSpell[6,2]      Minor Healing
     /varset PracticeSpell[6,3]      Summon Food
-    /varset PracticeSpell[6,4]      Sense Animals
-    /varset PracticeSpell[6,5]      Burst of Fire
+    /varset PracticeSpell[6,4]      Firefist
+    /varset PracticeSpell[6,5]      Invisibility Versus Animals of Fire
   
 |SHAMAN - Confirmed
     /varset PracticeSpell[10,1]     Endure Cold
